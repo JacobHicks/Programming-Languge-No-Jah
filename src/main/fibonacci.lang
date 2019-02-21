@@ -1,0 +1,12 @@
+def entry main { //Entry for program
+    n = 3;
+    stdout << n;
+    stdout << "Hello World!";
+    stdin >> n;
+    stdout << fibonacci(n);
+}
+
+def fibonacci(n : int) {
+    if(n <= 1) ret 1;
+    ret this(n - 1) + this(n - 2);
+}
