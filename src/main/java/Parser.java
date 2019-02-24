@@ -12,7 +12,7 @@ public class Parser {
     /* LIST OF ALL TOKENS */
 
     final static private Pattern whitespace = Pattern.compile("\\s+");
-    final static private Pattern identifier = Pattern.compile("^[\\D]\\w+");
+    final static private Pattern identifier = Pattern.compile("[^\\d&&[^\\s]][\\w&&[^\\s]]*");
     final static private Pattern number = Pattern.compile("\\D{0}\\d+\\D{0}");
     final static private Pattern binary = Pattern.compile("\\D{0}[01]+b\\D{0}");
     final static private Pattern hexadecmal = Pattern.compile("\\D{0}0x[\\da-f[A-F]]+\\D{0}");
@@ -25,65 +25,75 @@ public class Parser {
     final static private Pattern singlelinecomment = Pattern.compile("//.+\n*");
     final static private Pattern multilinecomment = Pattern.compile("/\\*[\\s\\S]*\\*/");
 
-
-
     public static Queue<Token> parse(File file) throws FileNotFoundException {
         Scanner in = new Scanner(file);
-        in.useDelimiter(";");
+        in.useDelimiter(Pattern.compile("\\z"));
         Queue<Token> tokens = new LinkedList<>();
-        buffer = "";
-        while(in.hasNext()) {
-            if(buffer.length() == 0) {
-                buffer = in.next();
+        buffer = in.next();
+        while(buffer.length() != 0) {
+
+            Matcher singleline = singlelinecomment.matcher(buffer); //All the matchers, there has to be a better way
+            Matcher multi = multilinecomment.matcher(buffer);
+            Matcher bin = binary.matcher(buffer);
+            Matcher num = number.matcher(buffer);
+            Matcher hex = hexadecmal.matcher(buffer);
+            Matcher str = string.matcher(buffer);
+            Matcher openbr = openbrace.matcher(buffer);
+            Matcher closebr = closebrace.matcher(buffer);
+            Matcher openpar = openparenthesis.matcher(buffer);
+            Matcher closepar = closeparenthesis.matcher(buffer);
+            Matcher oper = operator.matcher(buffer);
+            Matcher identi = identifier.matcher(buffer);
+            Matcher whites = whitespace.matcher(buffer);
+
+            if (singleline.lookingAt()) {
+                buffer = buffer.substring(singleline.end());
             }
-            if (singlelinecomment.matcher(buffer).(0)) {
-                buffer = buffer.substring(singlelinecomment.matcher(buffer).end());
+            else if (multi.lookingAt()) {
+                buffer = buffer.substring(multi.end());
             }
-            else if (multilinecomment.matcher(buffer).find(0)) {
-                buffer = buffer.substring(multilinecomment.matcher(buffer).end());
+            else if (num.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, num.end()), Type.DECIMAL, buffer.substring(0, num.end())));
+                buffer = buffer.substring(num.end());
             }
-            else if (number.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, number.matcher(buffer).end()), Type.DECIMAL, buffer.substring(0, number.matcher(buffer).end())));
-                buffer = buffer.substring(number.matcher(buffer).end());
+            else if(bin.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, bin.end()), Type.BINARY, buffer.substring(0, bin.end())));
+                buffer = buffer.substring(bin.end());
             }
-            else if(binary.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, binary.matcher(buffer).end()), Type.BINARY, buffer.substring(0, binary.matcher(buffer).end())));
-                buffer = buffer.substring(binary.matcher(buffer).end());
+            else if(hex.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, hex.end()), Type.HEXADECIMAL, buffer.substring(0, hex.end())));
+                buffer = buffer.substring(hex.end());
             }
-            else if(hexadecmal.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, hexadecmal.matcher(buffer).end()), Type.HEXADECIMAL, buffer.substring(0, hexadecmal.matcher(buffer).end())));
-                buffer = buffer.substring(hexadecmal.matcher(buffer).end());
+            else if(str.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, str.end()), Type.STRING, buffer.substring(0, str.end())));
+                buffer = buffer.substring(str.end());
             }
-            else if(string.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, string.matcher(buffer).end()), Type.STRING, buffer.substring(0, string.matcher(buffer).end())));
-                buffer = buffer.substring(string.matcher(buffer).end());
+            else if(openbr.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, openbr.end()), Type.VOID, null));
+                buffer = buffer.substring(openbr.end());
             }
-            else if(openbrace.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, openbrace.matcher(buffer).end()), Type.VOID, null));
-                buffer = buffer.substring(openbrace.matcher(buffer).end());
+            else if(closebr.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, closebr.end()), Type.VOID, null));
+                buffer = buffer.substring(closebr.end());
             }
-            else if(closebrace.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, closebrace.matcher(buffer).end()), Type.VOID, null));
-                buffer = buffer.substring(closebrace.matcher(buffer).end());
+            else if(openpar.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, openpar.end()), Type.VOID, null));
+                buffer = buffer.substring(openpar.end());
             }
-            else if(openparenthesis.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, openparenthesis.matcher(buffer).end()), Type.VOID, null));
-                buffer = buffer.substring(openparenthesis.matcher(buffer).end());
+            else if(closepar.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, closepar.end()), Type.VOID, null));
+                buffer = buffer.substring(closepar.end());
             }
-            else if(closeparenthesis.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, closeparenthesis.matcher(buffer).end()), Type.VOID, null));
-                buffer = buffer.substring(closeparenthesis.matcher(buffer).end());
+            else if(oper.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, oper.end()), Type.VOID, null));
+                buffer = buffer.substring(oper.end());
             }
-            else if(operator.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, operator.matcher(buffer).end()), Type.VOID, null));
-                buffer = buffer.substring(operator.matcher(buffer).end());
+            else if (identi.lookingAt()) {
+                tokens.offer(new Token(buffer.substring(0, identi.end()), Type.VOID, null));
+                buffer = buffer.substring(identi.end());
             }
-            else if (identifier.matcher(buffer).find(0)) {
-                tokens.offer(new Token(buffer.substring(0, identifier.matcher(buffer).end()), Type.VOID, null));
-                buffer = buffer.substring(identifier.matcher(buffer).end());
-            }
-            else if (whitespace.matcher(buffer).find(0)) {
-                buffer = buffer.substring(whitespace.matcher(buffer).end());
+            else if (whites.lookingAt()) {
+                buffer = buffer.substring(whites.end());
             }
         }
         in.close();

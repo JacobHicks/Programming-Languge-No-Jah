@@ -28,6 +28,6 @@ public class Token {
     }
 
     public String toString() {
-        return identifier + " = " + value.toString() + " :: " + type;
+        return "| " + identifier + " := " + value.toString() + " ::: " + type + " |";
     }
 }
