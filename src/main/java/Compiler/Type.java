@@ -1,3 +1,5 @@
+package Compiler;
+
 public enum Type {
     VOID,
     DECIMAL,

@@ -1,3 +1,5 @@
+package Compiler;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
@@ -12,11 +14,12 @@ public class Parser {
     /* LIST OF ALL TOKENS */
 
     final static private Pattern whitespace = Pattern.compile("\\s+");
+    final static private Pattern entryidentifier = Pattern.compile("(entry)\\s+([^\\d&&[^\\s]][\\w&&[^\\s]]*)");
     final static private Pattern identifier = Pattern.compile("[^\\d&&[^\\s]][\\w&&[^\\s]]*");
     final static private Pattern number = Pattern.compile("\\D{0}\\d+\\D{0}");
     final static private Pattern binary = Pattern.compile("\\D{0}[01]+b\\D{0}");
     final static private Pattern hexadecmal = Pattern.compile("\\D{0}0x[\\da-f[A-F]]+\\D{0}");
-    final static private Pattern string = Pattern.compile("\".+\"");
+    final static private Pattern string = Pattern.compile("\"(.+)\"");
     final static private Pattern openbrace = Pattern.compile("\\{");
     final static private Pattern closebrace = Pattern.compile("}");
     final static private Pattern openparenthesis = Pattern.compile("\\(");
@@ -43,6 +46,7 @@ public class Parser {
             Matcher openpar = openparenthesis.matcher(buffer);
             Matcher closepar = closeparenthesis.matcher(buffer);
             Matcher oper = operator.matcher(buffer);
+            Matcher entryidenti = entryidentifier.matcher(buffer);
             Matcher identi = identifier.matcher(buffer);
             Matcher whites = whitespace.matcher(buffer);
 
@@ -65,7 +69,7 @@ public class Parser {
                 buffer = buffer.substring(hex.end());
             }
             else if(str.lookingAt()) {
-                tokens.offer(new Token(buffer.substring(0, str.end()), Type.STRING, buffer.substring(0, str.end())));
+                tokens.offer(new Token(str.group(0), Type.STRING, str.group(1)));
                 buffer = buffer.substring(str.end());
             }
             else if(openbr.lookingAt()) {
@@ -87,6 +91,10 @@ public class Parser {
             else if(oper.lookingAt()) {
                 tokens.offer(new Token(buffer.substring(0, oper.end()), Type.VOID, null));
                 buffer = buffer.substring(oper.end());
+            }
+            else if (entryidenti.lookingAt()) {
+                tokens.offer(new Token(entryidenti.group(1), Type.STRING, entryidenti.group(2)));
+                buffer = buffer.substring(entryidenti.end());
             }
             else if (identi.lookingAt()) {
                 tokens.offer(new Token(buffer.substring(0, identi.end()), Type.VOID, null));

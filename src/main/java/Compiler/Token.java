@@ -1,3 +1,5 @@
+package Compiler;
+
 public class Token {
     String identifier;
     Type type;
@@ -19,7 +21,7 @@ public class Token {
             return Long.parseLong(first, 16);
         }
         else if(type.equals(Type.STRING)) {
-            return first.substring(1, first.length() - 1);
+            return first;
         }
         else if(type.equals(Type.VOID)) {
             return "null";
@@ -28,6 +30,6 @@ public class Token {
     }
 
     public String toString() {
-        return "| " + identifier + " := " + value.toString() + " ::: " + type + " |";
+        return identifier + " := " + value.toString() + " ::: " + type + " \n";
     }
 }
