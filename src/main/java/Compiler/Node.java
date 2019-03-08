@@ -7,10 +7,12 @@ public class Node {
     //ORDER OF OPERATIONS\\
     private final String[][] orderOfOperations = {
             {"{"},
-            {"(", ")"},
+            {"[", "]", ".", "(", ")"},
             {"*", "/"},
             {"+", "-"},
+            {"="},
             {">>", "<<"},
+            {";"},
             {"entry"}
 
     };

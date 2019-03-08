@@ -17,10 +17,12 @@ public class Lexer {
         while(!inputQ.isEmpty()) {
             Node node = new Node(inputQ.poll());
             if(node.isOperator()) {
-                while(!operators.isEmpty() && operators.peek().getPrecedence() <= node.getPrecedence()) {
+                while (!operators.isEmpty() && operators.peek().getPrecedence() <= node.getPrecedence()) {
                     Node operator = operators.pop();
                     Node exp2 = operands.pop();
                     Node exp1 = operands.pop();
+                    exp2.setParent(operator);
+                    exp1.setParent(operator);
                     operator.addChild(exp1, exp2);
                     operands.push(operator);
                 }
@@ -30,10 +32,18 @@ public class Lexer {
                 operands.push(node);
             }
         }
-        Node operator = operators.pop();
-        Node exp2 = operands.pop();
-        Node exp1 = operands.pop();
-        operator.addChild(exp1, exp2);
-        return operator;
+
+        while (!operators.isEmpty()) {
+            Node operator = operators.pop();
+            Node exp2 = operands.pop();
+            Node exp1 = operands.pop();
+            exp2.setParent(operator);
+            exp1.setParent(operator);
+            operator.addChild(exp1, exp2);
+            operands.push(operator);
+        }
+        operands.peek().setParent(entry);
+        entry.addChild(operands.pop());
+        return entry;
     }
 }
