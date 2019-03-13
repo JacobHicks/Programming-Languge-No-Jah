@@ -1,2 +1,3 @@
 entry arith
-    stdout << x = 2 + 3 * 3 / 2 - 1
+    x = 2 + 3 * 3 / 2 - 1;
+    stdout << x;

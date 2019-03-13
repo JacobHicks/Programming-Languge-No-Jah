@@ -12,7 +12,6 @@ public class Node {
             {"+", "-"},
             {"="},
             {">>", "<<"},
-            {";"},
             {"entry"}
 
     };
@@ -54,5 +53,9 @@ public class Node {
 
     public int getPrecedence() {
         return precedence;
+    }
+
+    public boolean isTerminator() {
+        return token.identifier.equals(";");
     }
 }

@@ -14,6 +14,7 @@ public class Lexer {
         entry = new Node(entrytoken);
         Stack<Node> operators = new Stack<>();
         Stack<Node> operands = new Stack<>();
+        //Stack<Node> statements = new Stack<>();
         while(!inputQ.isEmpty()) {
             Node node = new Node(inputQ.poll());
             if(node.isOperator()) {
@@ -28,22 +29,22 @@ public class Lexer {
                 }
                 operators.push(node);
             }
+            else if(node.isTerminator()) {
+                while (!operators.isEmpty()) {
+                    Node operator = operators.pop();
+                    Node exp2 = operands.pop();
+                    Node exp1 = operands.pop();
+                    exp2.setParent(operator);
+                    exp1.setParent(operator);
+                    operator.addChild(exp1, exp2);
+                    operands.push(operator);
+                }
+                entry.addChild(operands.pop());
+            }
             else {
                 operands.push(node);
             }
         }
-
-        while (!operators.isEmpty()) {
-            Node operator = operators.pop();
-            Node exp2 = operands.pop();
-            Node exp1 = operands.pop();
-            exp2.setParent(operator);
-            exp1.setParent(operator);
-            operator.addChild(exp1, exp2);
-            operands.push(operator);
-        }
-        operands.peek().setParent(entry);
-        entry.addChild(operands.pop());
         return entry;
     }
 }
