@@ -20,10 +20,8 @@ public class Parser {
     final static private Pattern binary = Pattern.compile("\\D{0}[01]+b\\D{0}");
     final static private Pattern hexadecmal = Pattern.compile("\\D{0}0x[\\da-f[A-F]]+\\D{0}");
     final static private Pattern string = Pattern.compile("\"(.+)\"");
-    final static private Pattern openbrace = Pattern.compile("\\{");
-    final static private Pattern closebrace = Pattern.compile("}");
-    final static private Pattern openparenthesis = Pattern.compile("\\(");
-    final static private Pattern closeparenthesis = Pattern.compile("\\)");
+    final static private Pattern openbracket = Pattern.compile("[\\(\\[{]");
+    final static private Pattern closebracket = Pattern.compile("[\\)\\]}]");
     final static private Pattern operator = Pattern.compile("[!@#$%^&*-+=<>.|/]+");
     final static private Pattern singlelinecomment = Pattern.compile("//.+\n*");
     final static private Pattern multilinecomment = Pattern.compile("/\\*[\\s\\S]*\\*/");
@@ -41,10 +39,8 @@ public class Parser {
             Matcher num = number.matcher(buffer);
             Matcher hex = hexadecmal.matcher(buffer);
             Matcher str = string.matcher(buffer);
-            Matcher openbr = openbrace.matcher(buffer);
-            Matcher closebr = closebrace.matcher(buffer);
-            Matcher openpar = openparenthesis.matcher(buffer);
-            Matcher closepar = closeparenthesis.matcher(buffer);
+            Matcher openbr = openbracket.matcher(buffer);
+            Matcher closebr = closebracket.matcher(buffer);
             Matcher oper = operator.matcher(buffer);
             Matcher entryidenti = entryidentifier.matcher(buffer);
             Matcher identi = identifier.matcher(buffer);
@@ -79,14 +75,6 @@ public class Parser {
             else if(closebr.lookingAt()) {
                 tokens.offer(new Token(buffer.substring(0, closebr.end()), Type.VOID, null));
                 buffer = buffer.substring(closebr.end());
-            }
-            else if(openpar.lookingAt()) {
-                tokens.offer(new Token(buffer.substring(0, openpar.end()), Type.VOID, null));
-                buffer = buffer.substring(openpar.end());
-            }
-            else if(closepar.lookingAt()) {
-                tokens.offer(new Token(buffer.substring(0, closepar.end()), Type.VOID, null));
-                buffer = buffer.substring(closepar.end());
             }
             else if(oper.lookingAt()) {
                 tokens.offer(new Token(buffer.substring(0, oper.end()), Type.VOID, null));

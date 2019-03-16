@@ -1,3 +1,11 @@
-entry arith
-    x = 2 + 3 * 3 / 2 - 1;
-    stdout << x;
+entry arith {
+    x = 2 / 2 + 2 - 1;
+    if(x == 2;) {
+        stdout << x;
+        x = 4;
+        if(x == 3;) {
+            stdout << 3;
+        }
+    }
+    stdout << "Kung Fu Chicken";
+}

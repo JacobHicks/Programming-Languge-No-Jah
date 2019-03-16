@@ -11,10 +11,10 @@ public class Lexer {
             inputQ.offer(entrytoken);
             entrytoken = inputQ.poll();
         }
-        entry = new Node(entrytoken);
         Stack<Node> operators = new Stack<>();
         Stack<Node> operands = new Stack<>();
-        //Stack<Node> statements = new Stack<>();
+        Stack<Node> branched = new Stack<>();
+        operands.push(new Node(entrytoken));
         while(!inputQ.isEmpty()) {
             Node node = new Node(inputQ.poll());
             if(node.isOperator()) {
@@ -29,6 +29,18 @@ public class Lexer {
                 }
                 operators.push(node);
             }
+            else if(node.matches("[({]")) {
+                branched.push(operands.pop());
+            }
+            else if(node.matches("[)}]")) {
+                Node branch = branched.pop();
+                if(!branched.isEmpty() && !node.equals(")")) {
+                    branched.peek().addChild(branch);
+                }
+                else {
+                    operands.push(branch);
+                }
+            }
             else if(node.isTerminator()) {
                 while (!operators.isEmpty()) {
                     Node operator = operators.pop();
@@ -39,12 +51,12 @@ public class Lexer {
                     operator.addChild(exp1, exp2);
                     operands.push(operator);
                 }
-                entry.addChild(operands.pop());
+                branched.peek().addChild(operands.pop());
             }
             else {
                 operands.push(node);
             }
         }
-        return entry;
+        return operands.pop();
     }
 }

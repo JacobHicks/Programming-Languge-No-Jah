@@ -6,10 +6,10 @@ import java.util.Arrays;
 public class Node {
     //ORDER OF OPERATIONS\\
     private final String[][] orderOfOperations = {
-            {"{"},
-            {"[", "]", ".", "(", ")"},
+            {"."},
             {"*", "/"},
             {"+", "-"},
+            {"=="},
             {"="},
             {">>", "<<"},
             {"entry"}
@@ -57,5 +57,11 @@ public class Node {
 
     public boolean isTerminator() {
         return token.identifier.equals(";");
+    }
+    public boolean equals(String s) {
+        return s.equals(token.identifier);
+    }
+    public boolean matches(String s) {
+        return token.identifier.matches(s);
     }
 }
