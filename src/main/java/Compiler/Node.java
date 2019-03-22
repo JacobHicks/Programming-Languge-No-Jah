@@ -50,17 +50,26 @@ public class Node {
     private String setTemplate(Token token) {
         if(token.type.equals(Type.VOID)) {
             switch (token.identifier) {
-                case("int"):
-                    outputregister = "{$}";
-                    return "[1]" +
-                            "DW {$}" +
-                            "[0]\n";
                 case ("+"):
-                    outputregister = "eax ebx";
+                    outputregister = "eax";
                     return "mov eax, <1>\n" +
                             "mov ebx, <2>\n" +
-                            "add eax, ebx\n" +
-                            "mov <1>, eax\n";
+                            "add eax, ebx\n";
+                case ("-"):
+                    outputregister = "eax";
+                    return "mov eax, <1>\n" +
+                            "mov ebx, <2>\n" +
+                            "sub eax, ebx\n";
+                case ("*"):
+                    outputregister = "eax";
+                    return "mov eax, <1>\n" +
+                            "mov ebx, <2>\n" +
+                            "mul eax, ebx\n";
+                case ("/"):
+                    outputregister = "eax";
+                    return "mov eax, <1>\n" +
+                            "mov ebx, <2>\n" +
+                            "div eax, ebx\n";
                 case ("="):
                     outputregister = "<1>";
                     return "mov <1>, <2>\n";
@@ -69,6 +78,18 @@ public class Node {
                     return "mov ecx, <1>\n" +
                             "push ecx\n" +
                             "call msvcrt.puts\n";
+            }
+        }
+        else if(token.type.equals(Type.STRING)) {
+            switch (token.identifier) {
+                case("int"):
+                    outputregister = "{$}";
+                    return "[1]" +
+                            "DW {$}\n" +
+                            "[0]\n";
+                    default:
+                        outputregister = token.value.toString();
+                        return "";
             }
         }
         outputregister = token.identifier;

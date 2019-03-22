@@ -1,4 +1,4 @@
 entry hello {
-    int num = 65;
+    int num = 2 * 5;
     print(num;);
 }

@@ -87,7 +87,7 @@ public class Parser {
                 buffer = buffer.substring(entryidenti.end());
             }
             else if (intdef.lookingAt()) {
-                tokens.offer(new Token("int", Type.VOID, buffer.substring(3, intdef.end()).trim()));
+                tokens.offer(new Token("int", Type.STRING, buffer.substring(3, intdef.end()).trim()));
                 buffer = buffer.substring(intdef.end());
             }
             else if (identi.lookingAt()) {

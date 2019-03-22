@@ -2,6 +2,7 @@ package Compiler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -10,8 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Translator {
-    final static Pattern sectionSwitcher = Pattern.compile("\\[(\\d)].*");
-    final static Pattern childSelect = Pattern.compile("<(\\d)>.*");
+    final static Pattern sectionSwitcher = Pattern.compile("\\[(\\d)]");
+    final static Pattern childSelect = Pattern.compile("<(\\d)>");
     public static void translate(Node entry, File outfile) {
         try {
             PrintWriter out = new PrintWriter(outfile);
@@ -21,23 +22,20 @@ public class Translator {
             }
             recursiveParse(entry, sections);
 
-            out.println("section .text");
+            out.print("section .text");
             while (!sections[0].isEmpty()) {
-                out.println(sections[0].poll());
+                out.print(sections[0].poll());
             }
-            out.flush();
-            out.println("section .bsd");
+            out.println("\nsection .bsd");
             while (!sections[1].isEmpty()) {
-                out.println(sections[1].poll());
+                out.print(sections[1].poll());
             }
-            out.flush();
-            out.println("section .data");
+            out.println("\nsection .data");
             while (!sections[2].isEmpty()) {
-                out.println(sections[2].poll());
+                out.print(sections[2].poll());
             }
-            out.flush();
             out.close();
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -56,13 +54,18 @@ public class Translator {
 
             if (switchMatch.lookingAt()) {
                 mode = Integer.parseInt(switchMatch.group(1));
-
+                entry.asm = entry.asm.substring(switchMatch.end());
             } else if (childMatch.lookingAt()) {
-                sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1))).outputregister);
+                sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
                 entry.asm = entry.asm.substring(childMatch.end());
             } else {
-                sections[mode].offer(entry.asm.substring(0, Math.min(entry.asm.indexOf(' '), entry.asm.indexOf('\n'))));
-                entry.asm = entry.asm.substring(0, Math.min(entry.asm.indexOf(' '), entry.asm.indexOf('\n')));
+                int spaceindex = entry.asm.indexOf(' ') + 1;
+                int newlineindex = entry.asm.indexOf('\n') + 1;
+                if (spaceindex == 0) spaceindex = entry.asm.length();
+                if (newlineindex == 0) newlineindex = entry.asm.length();
+                int newdex = Math.min(spaceindex, newlineindex);
+                sections[mode].offer(entry.asm.substring(0, newdex));
+                entry.asm = entry.asm.substring(newdex);
             }
         }
     }
