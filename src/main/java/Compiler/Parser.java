@@ -16,6 +16,7 @@ public class Parser {
     final static private Pattern whitespace = Pattern.compile("\\s+");
     final static private Pattern entryidentifier = Pattern.compile("(entry)\\s+([^\\d&&[^\\s]][\\w&&[^\\s]]*)");
     final static private Pattern identifier = Pattern.compile("[^\\d&&[^\\s]][\\w&&[^\\s]]*");
+    final static private Pattern intdefinition = Pattern.compile("int[\\s]+[^\\d&&[^\\s]][\\w&&[^\\s]]*");
     final static private Pattern number = Pattern.compile("\\D{0}\\d+\\D{0}");
     final static private Pattern binary = Pattern.compile("\\D{0}[01]+b\\D{0}");
     final static private Pattern hexadecmal = Pattern.compile("\\D{0}0x[\\da-f[A-F]]+\\D{0}");
@@ -44,6 +45,7 @@ public class Parser {
             Matcher oper = operator.matcher(buffer);
             Matcher entryidenti = entryidentifier.matcher(buffer);
             Matcher identi = identifier.matcher(buffer);
+            Matcher intdef = intdefinition.matcher(buffer);
             Matcher whites = whitespace.matcher(buffer);
 
             if (singleline.lookingAt()) {
@@ -83,6 +85,10 @@ public class Parser {
             else if (entryidenti.lookingAt()) {
                 tokens.offer(new Token(entryidenti.group(1), Type.STRING, entryidenti.group(2)));
                 buffer = buffer.substring(entryidenti.end());
+            }
+            else if (intdef.lookingAt()) {
+                tokens.offer(new Token("int", Type.VOID, buffer.substring(3, intdef.end()).trim()));
+                buffer = buffer.substring(intdef.end());
             }
             else if (identi.lookingAt()) {
                 tokens.offer(new Token(buffer.substring(0, identi.end()), Type.VOID, null));

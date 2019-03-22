@@ -22,7 +22,14 @@ public class Node {
     private int precedence;
     private boolean isOperator;
 
+    public String asm;
+    public String outputregister;
+
     public Node(Token token) {
+        update(token);
+    }
+
+    public void update(Token token) {
         this.token = token;
         children = new ArrayList<>();
         isOperator = false;
@@ -37,6 +44,35 @@ public class Node {
                 }
             }
         }
+        asm = setTemplate(token);
+    }
+
+    private String setTemplate(Token token) {
+        if(token.type.equals(Type.VOID)) {
+            switch (token.identifier) {
+                case("int"):
+                    outputregister = "{$}";
+                    return "[1]" +
+                            "DW {$}" +
+                            "[0]\n";
+                case ("+"):
+                    outputregister = "eax ebx";
+                    return "mov eax, <1>\n" +
+                            "mov ebx, <2>\n" +
+                            "add eax, ebx\n" +
+                            "mov <1>, eax\n";
+                case ("="):
+                    outputregister = "<1>";
+                    return "mov <1>, <2>\n";
+                case ("print"):
+                    outputregister = "null";
+                    return "mov ecx, <1>\n" +
+                            "push ecx\n" +
+                            "call msvcrt.puts\n";
+            }
+        }
+        outputregister = token.identifier;
+        return "";
     }
 
     public void setParent(Node parent) {
@@ -63,5 +99,14 @@ public class Node {
     }
     public boolean matches(String s) {
         return token.identifier.matches(s);
+    }
+    public Type getType() {
+        return token.type;
+    }
+    public Object getValue() {
+        return token.value;
+    }
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 }
