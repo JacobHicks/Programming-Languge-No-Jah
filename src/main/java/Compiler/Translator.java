@@ -57,11 +57,13 @@ public class Translator {
                 mode = Integer.parseInt(switchMatch.group(1));
                 entry.asm = entry.asm.substring(switchMatch.end());
             } else if (childMatch.lookingAt()) {
-                sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
-                String res = entry.asm.substring(childMatch.end());
                 if(entry.asm.charAt(0) == '`' && !isRegister(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister)) {
-                    res = "[" + res + "]";
+                    sections[mode].offer("[" + entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister + "]");
                 }
+                else {
+                    sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
+                }
+                entry.asm = entry.asm.substring(switchMatch.end());
             } else {
                 sections[mode].offer(entry.asm.substring(0, 1));
                 entry.asm = entry.asm.substring(1);
