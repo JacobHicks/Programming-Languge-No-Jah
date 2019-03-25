@@ -12,7 +12,8 @@ import java.util.regex.Pattern;
 
 public class Translator {
     final static Pattern sectionSwitcher = Pattern.compile("\\[(\\d)]");
-    final static Pattern childSelect = Pattern.compile("<(\\d)>");
+    final static Pattern childSelect = Pattern.compile("`*<(\\d)>");
+    final static String[] registers = {"eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", "ax", "bx", "cx", "dx", "si", "di", "bp", "sp", "ah", "al", "bh", "bl", "ch", "cl", "dh", "dl"};
     public static void translate(Node entry, File outfile) {
         try {
             PrintWriter out = new PrintWriter(outfile);
@@ -21,18 +22,18 @@ public class Translator {
                 sections[i] = new LinkedList<>();
             }
             recursiveParse(entry, sections);
-
-            out.print("section .text");
-            while (!sections[0].isEmpty()) {
-                out.print(sections[0].poll());
+            out.println("extern printf");
+            out.println("\nsection .data");
+            while (!sections[2].isEmpty()) {
+                out.print(sections[2].poll());
             }
             out.println("\nsection .bsd");
             while (!sections[1].isEmpty()) {
                 out.print(sections[1].poll());
             }
-            out.println("\nsection .data");
-            while (!sections[2].isEmpty()) {
-                out.print(sections[2].poll());
+            out.print("section .text");
+            while (!sections[0].isEmpty()) {
+                out.print(sections[0].poll());
             }
             out.close();
         } catch (Exception e) {
@@ -57,11 +58,21 @@ public class Translator {
                 entry.asm = entry.asm.substring(switchMatch.end());
             } else if (childMatch.lookingAt()) {
                 sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
-                entry.asm = entry.asm.substring(childMatch.end());
+                String res = entry.asm.substring(childMatch.end());
+                if(entry.asm.charAt(0) == '`' && !isRegister(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister)) {
+                    res = "[" + res + "]";
+                }
             } else {
                 sections[mode].offer(entry.asm.substring(0, 1));
                 entry.asm = entry.asm.substring(1);
             }
         }
+    }
+
+    private static boolean isRegister(String outputregister) {
+        for(String reg : registers) {
+            if(outputregister.equals(reg)) return true;
+        }
+        return false;
     }
 }

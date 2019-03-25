@@ -2,3 +2,19 @@ entry hello {
     int num = 2 * 5;
     print(num;);
 }
+/*
+extern printf
+section .data
+
+section .bss
+num: resd 0
+
+section .text
+mov eax, 2
+mov ebx, 5
+mul ebx
+mov [num], eax
+mov ecx, num
+push ecx
+call printf
+*/

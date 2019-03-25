@@ -65,7 +65,7 @@ public class Node {
                     outputregister = "eax";
                     return "mov eax, <1>\n" +
                             "mov ebx, <2>\n" +
-                            "mul eax, ebx\n";
+                            "mul ebx\n";
                 case ("/"):
                     outputregister = "eax";
                     return "mov eax, <1>\n" +
@@ -73,7 +73,7 @@ public class Node {
                             "div eax, ebx\n";
                 case ("="):
                     outputregister = "<1>";
-                    return "mov <1>, <2>\n";
+                    return "mov `<1>, <2>\n";
                 case("if"):
                     labelcount++;
                     return "j<1> label" + labelcount + "\n";
