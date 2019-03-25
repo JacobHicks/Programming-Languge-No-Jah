@@ -24,6 +24,7 @@ public class Node {
 
     public String asm;
     public String outputregister;
+    int labelcount = 0;
 
     public Node(Token token) {
         update(token);
@@ -73,6 +74,9 @@ public class Node {
                 case ("="):
                     outputregister = "<1>";
                     return "mov <1>, <2>\n";
+                case("if"):
+                    labelcount++;
+                    return "j<1> label" + labelcount + "\n";
                 case ("print"):
                     outputregister = "null";
                     return "mov ecx, <1>\n" +

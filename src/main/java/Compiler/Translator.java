@@ -59,13 +59,8 @@ public class Translator {
                 sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
                 entry.asm = entry.asm.substring(childMatch.end());
             } else {
-                int spaceindex = entry.asm.indexOf(' ') + 1;
-                int newlineindex = entry.asm.indexOf('\n') + 1;
-                if (spaceindex == 0) spaceindex = entry.asm.length();
-                if (newlineindex == 0) newlineindex = entry.asm.length();
-                int newdex = Math.min(spaceindex, newlineindex);
-                sections[mode].offer(entry.asm.substring(0, newdex));
-                entry.asm = entry.asm.substring(newdex);
+                sections[mode].offer(entry.asm.substring(0, 1));
+                entry.asm = entry.asm.substring(1);
             }
         }
     }
