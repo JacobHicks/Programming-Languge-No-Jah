@@ -81,7 +81,7 @@ public class Node {
                     outputregister = "null";
                     return "mov ecx, <1>\n" +
                             "push ecx\n" +
-                            "call msvcrt.puts\n";
+                            "call printf\n";
             }
         }
         else if(token.type.equals(Type.STRING)) {
@@ -89,7 +89,7 @@ public class Node {
                 case("int"):
                     outputregister = "{$}";
                     return "[1]" +
-                            "DW {$}\n" +
+                            "{$}: resd 0\n" +
                             "[0]\n";
                     default:
                         outputregister = token.value.toString();

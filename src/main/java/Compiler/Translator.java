@@ -22,16 +22,18 @@ public class Translator {
                 sections[i] = new LinkedList<>();
             }
             recursiveParse(entry, sections);
-            out.println("extern printf");
-            out.println("\nsection .data");
+            out.println("extern printf\n" +
+                    "global start");
+            out.println("section .data");
             while (!sections[2].isEmpty()) {
                 out.print(sections[2].poll());
             }
-            out.println("\nsection .bsd");
+            out.println("\nsection .bss");
             while (!sections[1].isEmpty()) {
                 out.print(sections[1].poll());
             }
-            out.print("section .text");
+            out.print("\nsection .text\n" +
+                    "start:");
             while (!sections[0].isEmpty()) {
                 out.print(sections[0].poll());
             }
@@ -40,7 +42,7 @@ public class Translator {
             e.printStackTrace();
         }
     }
-    public static void recursiveParse (Node entry, Queue<String>[] sections) { //0 is .text, 1 is .bsd, 2 is .data
+    public static void recursiveParse (Node entry, Queue<String>[] sections) { //0 is .text, 1 is .bss, 2 is .data
         for(Node child : entry.getChildren()) {
             recursiveParse(child, sections);
         }
@@ -63,7 +65,7 @@ public class Translator {
                 else {
                     sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
                 }
-                entry.asm = entry.asm.substring(switchMatch.end());
+                entry.asm = entry.asm.substring(childMatch.end());
             } else {
                 sections[mode].offer(entry.asm.substring(0, 1));
                 entry.asm = entry.asm.substring(1);
