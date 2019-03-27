@@ -25,6 +25,7 @@ public class Node {
     public String asm;
     public String outputregister;
     int labelcount = 0;
+    int numstrings = 0;
 
     public Node(Token token) {
         update(token);
@@ -79,21 +80,24 @@ public class Node {
                     return "j<1> label" + labelcount + "\n";
                 case ("print"):
                     outputregister = "null";
-                    return "mov ecx, <1>\n" +
-                            "push ecx\n" +
-                            "call msvcrt.puts\n";
+                    return "push <1>\n" +
+                            "call _printf\n" +
+                            "add esp, 4\n";
             }
         }
         else if(token.type.equals(Type.STRING)) {
+            if(token.value.toString().startsWith("\"") && token.value.toString().endsWith("\"")) {
+                outputregister = "str" + numstrings++;
+                return "[2]" +
+                        outputregister + ": db " + token.value.toString() + ", 0\n" +
+                        "[0]\n";
+            }
             switch (token.identifier) {
                 case("int"):
                     outputregister = "{$}";
                     return "[1]" +
-                            "DW {$}\n" +
+                            "{$}: resd 0\n" +
                             "[0]\n";
-                    default:
-                        outputregister = token.value.toString();
-                        return "";
             }
         }
         outputregister = token.identifier;

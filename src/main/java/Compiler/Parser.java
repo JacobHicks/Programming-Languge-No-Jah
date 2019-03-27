@@ -67,7 +67,7 @@ public class Parser {
                 buffer = buffer.substring(hex.end());
             }
             else if(str.lookingAt()) {
-                tokens.offer(new Token(str.group(0), Type.STRING, str.group(1)));
+                tokens.offer(new Token(str.group(1), Type.STRING, str.group(0)));
                 buffer = buffer.substring(str.end());
             }
             else if(openbr.lookingAt()) {
