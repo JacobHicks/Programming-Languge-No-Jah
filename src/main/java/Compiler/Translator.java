@@ -31,7 +31,8 @@ public class Translator {
             while (!sections[1].isEmpty()) {
                 out.print(sections[1].poll());
             }
-            out.print("section .text");
+            out.print("section .text\n" +
+                    "_main:");
             while (!sections[0].isEmpty()) {
                 out.print(sections[0].poll());
             }
@@ -63,7 +64,7 @@ public class Translator {
                 else {
                     sections[mode].offer(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister);
                 }
-                entry.asm = entry.asm.substring(switchMatch.end());
+                entry.asm = entry.asm.substring(childMatch.end());
             } else {
                 sections[mode].offer(entry.asm.substring(0, 1));
                 entry.asm = entry.asm.substring(1);
