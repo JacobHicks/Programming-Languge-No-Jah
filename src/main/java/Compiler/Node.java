@@ -9,7 +9,7 @@ public class Node {
             {"."},
             {"*", "/"},
             {"+", "-"},
-            {"=="},
+            {"==", "!="},
             {"="},
             {">>", "<<"},
             {"entry"}
@@ -24,8 +24,12 @@ public class Node {
 
     public String asm;
     public String outputregister;
-    int labelcount = 0;
-    int numstrings = 0;
+    static int labelcount = 0;
+    static int numstrings = 0;
+
+    public Node() {
+        children = new ArrayList<>();
+    }
 
     public Node(Token token) {
         update(token);
@@ -50,6 +54,11 @@ public class Node {
     }
 
     private String setTemplate(Token token) {
+        if(token.identifier.startsWith("entry")) {
+            outputregister = "";
+            return "(1|_main:\n)" +
+                    "ret";
+        }
         if(token.type.equals(Type.VOID)) {
             switch (token.identifier) {
                 case ("+"):
@@ -75,11 +84,30 @@ public class Node {
                 case ("="):
                     outputregister = "<1>";
                     return "mov `<1>, <2>\n";
+                case("=="):
+                    outputregister = "ne";
+                    return "mov eax, <1>\n" +
+                            "test eax, <2>\n";
+                case("!="):
+                    outputregister = "e";
+                    return "mov eax, <1>\n" +
+                            "test eax, <2>\n";
                 case("if"):
                     labelcount++;
-                    return "j<1> label" + labelcount + "\n";
+                    outputregister = "";
+                    return "(2|j<1> label" + labelcount + "\n)" +
+                            "<2+>" +
+                            "label" + labelcount + ":\n";
+                case("while"):
+                    labelcount++;
+                    outputregister = "";
+                    String asm = "(1|label" + labelcount++ + ":\n)";
+                    return asm + "(2|j<1> label" + labelcount + "\n)" +
+                            "<2+>" +
+                            "jmp label" + (labelcount - 1) +"\n" +
+                            "label" + labelcount++ + ":\n";
                 case ("print"):
-                    outputregister = "null";
+                    outputregister = "";
                     return "push <1>\n" +
                             "call _printf\n" +
                             "add esp, 4\n";
@@ -114,7 +142,7 @@ public class Node {
 
     public boolean isOperator() {
         return isOperator;
-    }
+    } 
 
     public int getPrecedence() {
         return precedence;

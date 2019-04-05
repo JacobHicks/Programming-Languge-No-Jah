@@ -3,7 +3,7 @@ package Compiler;
 import java.util.Queue;
 import java.util.Stack;
 
-public class Lexer {
+public class ASTFactory {
     static Node entry;
     public static Node parse(Queue<Token> inputQ) {
         Token entrytoken = inputQ.poll();

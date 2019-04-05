@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 public class Translator {
     final static Pattern sectionSwitcher = Pattern.compile("\\[(\\d)]");
     final static Pattern childSelect = Pattern.compile("`*<(\\d)>");
+    final static Pattern childrenSelect = Pattern.compile("`*<(\\d)\\+>");
+    final static Pattern prioritySelect = Pattern.compile("\\((\\d)\\|([^)]+)\\)");
     final static String[] registers = {"eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", "ax", "bx", "cx", "dx", "si", "di", "bp", "sp", "ah", "al", "bh", "bl", "ch", "cl", "dh", "dl"};
     public static void translate(Node entry, File outfile) {
         try {
@@ -32,33 +34,61 @@ public class Translator {
             while (!sections[1].isEmpty()) {
                 out.print(sections[1].poll());
             }
-            out.print("\nsection .text\n" +
-                    "_main:");
+            out.println("\nsection .text");
             while (!sections[0].isEmpty()) {
                 out.print(sections[0].poll());
             }
-            out.println("ret");
             out.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public static void recursiveParse (Node entry, Queue<String>[] sections) { //0 is .text, 1 is .bss, 2 is .data
+        if(entry.asm != null) {
+            Matcher priority = prioritySelect.matcher(entry.asm);
+            entry.asm = entry.asm.replaceAll("\\{\\$}", entry.getValue().toString()); //replace {} values with node data
+            entry.outputregister = entry.outputregister.replaceAll("\\{\\$}", entry.getValue().toString());
+            if (priority.lookingAt()) {
+                for(int i = 1; i < Integer.parseInt(priority.group(1)); i++) {
+                    recursiveParse(entry.getChildren().get(i-1), sections);
+                }
+                String tmp = entry.asm;
+                entry.asm = priority.group(2);
+                parse(entry, sections);
+                entry.asm = tmp.substring(priority.end());
+                recursiveParse(entry, sections);
+                if(entry.asm != null) {
+                    parse(entry, sections);
+                }
+                return;
+            }
+        }
         for(Node child : entry.getChildren()) {
             recursiveParse(child, sections);
         }
-        entry.asm = entry.asm.replaceAll("\\{\\$}", entry.getValue().toString()); //replace {} values with node data
-        entry.outputregister = entry.outputregister.replaceAll("\\{\\$}", entry.getValue().toString());
-
+        if(entry.asm != null) {
+            parse(entry, sections);
+        }
+    }
+    
+    private static void parse(Node entry, Queue[] sections) {
         int mode = 0;
-
         while (entry.asm.length() > 0) {
             Matcher switchMatch = sectionSwitcher.matcher(entry.asm);
             Matcher childMatch = childSelect.matcher(entry.asm);
+            Matcher childrenMatch = childrenSelect.matcher(entry.asm);
 
             if (switchMatch.lookingAt()) {
                 mode = Integer.parseInt(switchMatch.group(1));
                 entry.asm = entry.asm.substring(switchMatch.end());
+            } else if (childrenMatch.lookingAt()) {
+                Node branch = new Node();
+                for(int i = Integer.parseInt(childrenMatch.group(1)) - 1; i < entry.getChildren().size(); i++) {
+                    branch.addChild(entry.getChildren().get(i));
+                }
+                recursiveParse(branch, sections);
+                entry.asm = entry.asm.substring(childrenMatch.end());
             } else if (childMatch.lookingAt()) {
                 if(entry.asm.charAt(0) == '`' && !isRegister(entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister)) {
                     sections[mode].offer("[" + entry.getChildren().get(Integer.parseInt(childMatch.group(1)) - 1).outputregister + "]");

@@ -1,10 +1,12 @@
-def entry main { //Entry for program
-    int n;
-    stdin >> n;
-    stdout << fibonacci(n);
-}
-
-def fibonacci(n : int) {
-    if(n <= 1) return 1;
-    return this(n - 1) + this(n - 2);
+entry fibo { //Entry for program
+    int last1 = 1;
+    int last2 = 1;
+    int index = 0;
+    while(index != 15;) {
+        int tmp = last1;
+        last1 = last1 + last2;
+        last2 = tmp;
+        index = index + 1;
+    }
+    print(last1;);
 }
